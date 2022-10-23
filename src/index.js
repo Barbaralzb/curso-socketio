@@ -4,39 +4,32 @@ const { createServer } = require('http')
 const { Server } = require('socket.io')
 
 
-// Aqui creo mi servidor de Expressjs
 const app = express()
-// Aqui creo mi servidor http
 const httpServer = createServer(app)
-// Creo mi servir de WebSockets a partir de un servidor http usando socket.io
 const io = new Server(httpServer)
 
 
-// dirname -> es es path del directorio que contiene el actual archivo que se esta ejecutando
-// Esta linea es para decir donde quiero guardar mis archivos estaticos
 app.use(express.static(path.join(__dirname, 'views')))
 
 
 app.get('/', (req, res) => {
-    // Cada vez que visite la ruta raiz voy a mandar esta pag html
     res.sendFile(__dirname + '/views/index.html')
 })
 
 
 io.on("connection", socket => {
+    //  -> De esta forma emito un evento a todos los clientes conectador incluyendome (al socket conectado)
 
-    console.log('Clientes conectados:', io.engine.clientsCount)
-    console.log('Id del socket conectado:', socket.id)
+    // socket.on('circle position', position => {
+    //     io.emit('move circle', position)
+    // })
 
-    socket.on('disconnect', () => {
-        console.log('El socket' + socket.id + 'se a desconectado.')
-    })
 
-    socket.conn.once("upgrade", () => {
-        console.log('Hemos pasado de HTTP Long-Polling a', socket.conn.transport.name)
+    // Esto sirve por si se cae el servidor (o problemas de coneccion) pueda el cliente seguir interactuando
+    socket.on('circle position', position => {
+        socket.broadcast.emit('move circle', position)
     })
 
 })
 
-
-httpServer.listen(3000)
+httpServer.listen(3000) 

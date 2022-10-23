@@ -1,31 +1,38 @@
- // <!-- Este script es para que el cliente se conecte a WebSocket -->
-
-// La funcion io() la expone el archivo /socket.io/socket.io.js
-// Y esta funcion pemrmite detectar que un user se conectó
 const socket = io();
 
-function checkSocketStatus() {
-    console.log('Estado del socket:', socket.connected)
+const circle = document.querySelector('#circle')
+
+const drag = e => {
+    const position = {
+        top : e.clientY  + 'px',
+        left : e.clientX + 'px'
+    }
+
+    drawCircle(position)
+    socket.emit('circle position', position)
+
 }
 
-socket.on('connect', () => {
-    console.log('el socket se ha conectado : ', socket.id)
-    checkSocketStatus()
+const drawCircle = position => {
+    circle.style.left = position.left
+    circle.style.top = position.top
+}
+
+document.addEventListener('mousedown', e =>  {
+    document.addEventListener('mousemove', drag)
 })
 
-socket.on('connect_error', () => {
-    console.log('No pude conectarme 😢')
+document.addEventListener('mouseup', e =>  {
+    document.removeEventListener('mousemove', drag)
 })
 
-socket.on('disconnect', () => {
-    console.log('El usuario '+ socket.id + ' se desconecto')
-    checkSocketStatus()
-})
+// ->Aca mis eventos js dependen del servidor. Hay que cambiarlo por lo de abajo !!
+// socket.on('move circle', position => {
+//     circle.style.left = position.left
+//     circle.style.top = position.top
+// })
 
-socket.io.on('reconnect_attempt', (attempt) => {
-    console.log('Intento de connexion n°:', attempt)
-})
-
-socket.io.on('reconnect', () => {
-    console.log('Estoy he vuelto a conectar 💪🏼')
+// -> Entonces paso a esto
+socket.on('move circle', position => {
+    drawCircle(position)
 })
