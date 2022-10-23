@@ -4,36 +4,55 @@ const { createServer } = require('http')
 const { Server } = require('socket.io')
 
 
-// Aqui creo mi servidor de Expressjs
 const app = express()
-// Aqui creo mi servidor http
 const httpServer = createServer(app)
-// Creo mi servir de WebSockets a partir de un servidor http usando socket.io
 const io = new Server(httpServer)
 
 
-// dirname -> es es path del directorio que contiene el actual archivo que se esta ejecutando
-// Esta linea es para decir donde quiero guardar mis archivos estaticos
 app.use(express.static(path.join(__dirname, 'views')))
 
 
 app.get('/', (req, res) => {
-    // Cada vez que visite la ruta raiz voy a mandar esta pag html
     res.sendFile(__dirname + '/views/index.html')
 })
 
 
 io.on("connection", socket => {
 
-    console.log('Clientes conectados:', io.engine.clientsCount)
-    console.log('Id del socket conectado:', socket.id)
+    // voy a crear una propiedad llamada 'connectdRoom'
+    // que hara que el socket se conecte y este en ninguna sala
+    // que actualizare cuando se conecte a alguna sala en mi switch
+    socket.connectdRoom = ""
 
-    socket.on('disconnect', () => {
-        console.log('El socket' + socket.id + 'se a desconectado.')
+
+    // room es lo que envie del evento 'connect to room' en el cliente
+    socket.on('connect to room', room => {
+        switch (room) {
+            case 'room1':
+                // Join -> que meta al socket al una sala
+                // Si la sala no existe la va a crear
+                socket.join('room1')
+                socket.connectdRoom = "room1"
+                break;
+            case 'room2':
+                socket.join('room2')
+                socket.connectdRoom = "room2"
+                break;
+            case 'room3':
+                socket.join('room3')
+                socket.connectdRoom = "room3"
+                break;
+        }
     })
 
-    socket.conn.once("upgrade", () => {
-        console.log('Hemos pasado de HTTP Long-Polling a', socket.conn.transport.name)
+    socket.on('mesasge', message => {
+        console.log('aca esta el mensaje', message);
+        // Tengo que saber en que sala estoy para mandalo a esa sala
+        const room = socket.connectdRoom
+        io.to(room).emit("send message", {
+            message,
+            room
+        })
     })
 
 })

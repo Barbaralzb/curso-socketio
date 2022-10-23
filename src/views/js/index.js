@@ -1,31 +1,45 @@
- // <!-- Este script es para que el cliente se conecte a WebSocket -->
-
-// La funcion io() la expone el archivo /socket.io/socket.io.js
-// Y esta funcion pemrmite detectar que un user se conectó
 const socket = io();
 
-function checkSocketStatus() {
-    console.log('Estado del socket:', socket.connected)
-}
+// Selecciono mis 3 botones que me permitiran conectarme a las salas
 
-socket.on('connect', () => {
-    console.log('el socket se ha conectado : ', socket.id)
-    checkSocketStatus()
+const connectRoom1 = document.querySelector('#connectRoom1')
+const connectRoom2 = document.querySelector('#connectRoom2')
+const connectRoom3 = document.querySelector('#connectRoom3')
+
+
+// Eventos para que al hacer click me conecte a las salas
+
+connectRoom1.addEventListener('click', () => {
+    // Emito el evento 'connect to room' y le envio 'room1'
+    socket.emit('connect to room', "room1")
 })
 
-socket.on('connect_error', () => {
-    console.log('No pude conectarme 😢')
+connectRoom2.addEventListener('click', () => {
+    socket.emit('connect to room', "room2")
 })
 
-socket.on('disconnect', () => {
-    console.log('El usuario '+ socket.id + ' se desconecto')
-    checkSocketStatus()
+connectRoom3.addEventListener('click', () => {
+    socket.emit('connect to room', "room3")
 })
 
-socket.io.on('reconnect_attempt', (attempt) => {
-    console.log('Intento de connexion n°:', attempt)
+
+// Enviar mensaje
+
+const sendMessage = document.querySelector('#sendMessage')
+sendMessage.addEventListener('click', () => {
+    const message = prompt('Escribe tu mensaje')
+
+    socket.emit('message', message)
 })
 
-socket.io.on('reconnect', () => {
-    console.log('Estoy he vuelto a conectar 💪🏼')
+socket.on('send message', data => {
+    console.log(data);
+    const { room } = data
+    const { message } = data
+
+    const li = document.createElement('li')
+    li.textContent = message
+    document.querySelector(`#${room}`).append(li)
+
 })
+
