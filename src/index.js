@@ -4,16 +4,10 @@ const { createServer } = require('http')
 const { Server } = require('socket.io')
 
 
-// Aqui creo mi servidor de Expressjs
 const app = express()
-// Aqui creo mi servidor http
 const httpServer = createServer(app)
-// Creo mi servir de WebSockets a partir de un servidor http usando socket.io
 const io = new Server(httpServer)
 
-
-// dirname -> es es path del directorio que contiene el actual archivo que se esta ejecutando
-// Esta linea es para decir donde quiero guardar mis archivos estaticos
 app.use(express.static(path.join(__dirname, 'views')))
 
 
@@ -23,19 +17,31 @@ app.get('/', (req, res) => {
 })
 
 
-io.on("connection", socket => {
+// -> Esto es lo que tenia antes de trabajar con namespaces
+//-> Este io hace refencia al namespace por defecto
 
-    console.log('Clientes conectados:', io.engine.clientsCount)
-    console.log('Id del socket conectado:', socket.id)
+// io.on("connection", socket => {
+    // Aca escuchaba y emitia eventos
+//})
 
-    socket.on('disconnect', () => {
-        console.log('El socket' + socket.id + 'se a desconectado.')
+
+// -> Aca creo los namespaces
+// .of -> se conecta a un spacename en especifico
+const teachers = io.of("teachers")
+const students = io.of("students")
+
+teachers.on("connection", socket => {
+    socket.on("send message", data => {
+        // aca lo que teniamos antes era io.emit
+        // pero se llama teachers porque asi lo denomine al io que se conecta con el namespace
+        teachers.emit("message", data)
     })
+})
 
-    socket.conn.once("upgrade", () => {
-        console.log('Hemos pasado de HTTP Long-Polling a', socket.conn.transport.name)
+students.on("connection", socket => {
+    socket.on("send message", data => {
+        students.emit("message", data)
     })
-
 })
 
 

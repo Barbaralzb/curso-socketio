@@ -7,7 +7,12 @@
     <title>Servidor con Express y Socket.io</title>
 </head>
 <body>
-    <h1>Funciona</h1>
+    <h1>Chat de <span id="namespace"></span></h1>
+    <ul id="chat">
+    </ul>
+
+    <button id="sendMessage">Enviar mensaje</button>
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/index.js"></script>
 </body>

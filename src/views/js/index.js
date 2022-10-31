@@ -1,31 +1,56 @@
- // <!-- Este script es para que el cliente se conecte a WebSocket -->
+// -> Este ya no lo necesito ya que me conecto al namespace por defecto.
+// -> Dentro de los parentesis es donde ponemos el namespace pero como esta vacio va a tomar el por defecto
+//const socket = io ()
 
-// La funcion io() la expone el archivo /socket.io/socket.io.js
+const user = prompt("Escribe tu usuario")
+
+const profes = ["RetaxMaster", "juandc", "GNDX"]
+
+let socketNamespace, group;
+
+const chat = document.querySelector("#chat")
+const namespace = document.querySelector("#namespace")
+
 // Y esta funcion pemrmite detectar que un user se conectó
-const socket = io();
+// pero nosotros necesitamos trabajar con namespaces
+// entonces necesitamos especificar a que namespace vamos a conectarnos
+// const socket = io();
+// socket.on('welcome', res => {
+//     text.textContent = res
+// })
 
-function checkSocketStatus() {
-    console.log('Estado del socket:', socket.connected)
+
+
+if (profes.includes(user)) {
+    socketNamespace = io("/teachers")
+    group = "teachers"
+}
+else {
+    socketNamespace = io("/students")
+    group = "students"
 }
 
-socket.on('connect', () => {
-    console.log('el socket se ha conectado : ', socket.id)
-    checkSocketStatus()
+
+// -> Aca yo solo tengo una instacia de sockets que va estar concetado a uno u a otro namespace
+
+socketNamespace.on("connect", () => {
+    namespace.textContent =  group
 })
 
-socket.on('connect_error', () => {
-    console.log('No pude conectarme 😢')
+
+const sendMessage = document.querySelector("#sendMessage")
+sendMessage.addEventListener("click", () => {
+    const message = prompt("Escribe tu mensaje:")
+    // Aca le digo que io() va a estar conectandose a "/teachers"
+    socketNamespace.emit("send message", {
+        message, user
+    })
 })
 
-socket.on('disconnect', () => {
-    console.log('El usuario '+ socket.id + ' se desconecto')
-    checkSocketStatus()
-})
+socketNamespace.on("message", messageData => {
+    const { user, message } = messageData
+    const li = document.createElement("li")
+    li.textContent = `${user} : ${message}`
 
-socket.io.on('reconnect_attempt', (attempt) => {
-    console.log('Intento de connexion n°:', attempt)
-})
-
-socket.io.on('reconnect', () => {
-    console.log('Estoy he vuelto a conectar 💪🏼')
+    chat.append(li)
 })
