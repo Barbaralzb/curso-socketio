@@ -4,8 +4,8 @@
   "description": "curso de Socket.io",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start" : "nodemon src/index.js"
+    "test": "jest",
+    "start": "nodemon src/index.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "bufferutil": "^4.0.7",
+    "jest": "^29.2.2",
+    "socket.io-client": "^4.5.3",
     "utf-8-validate": "^5.0.10"
   }
 }
