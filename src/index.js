@@ -16,20 +16,27 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html')
 })
 
+// Middleware para determinar si esta autenticado a no
+io.use( (socket, next) => {
+    // usualmente los token vienen aqui
+    const token = socket.handshake.auth.token
+
+    if (token == "Barbara Lizama") {
+        next();
+    }
+    else {
+        // Error es un objeto
+
+        const err = new Error("No puedes pasar")
+        err.data = {
+            details : "No pudiste ser autenticado"
+        }
+        next(err)
+    }
+})
 
 io.on("connection", socket => {
-    //  -> De esta forma emito un evento a todos los clientes conectador incluyendome (al socket conectado)
-
-    // socket.on('circle position', position => {
-    //     io.emit('move circle', position)
-    // })
-
-
-    // Esto sirve por si se cae el servidor (o problemas de coneccion) pueda el cliente seguir interactuando
-    socket.on('circle position', position => {
-        socket.broadcast.emit('move circle', position)
-    })
-
+    console.log(socket.id);
 })
 
 httpServer.listen(3000) 
