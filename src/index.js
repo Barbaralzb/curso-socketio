@@ -1,3 +1,6 @@
+//process.env.DEBUG = "*"
+process.env.DEBUG = "engine, socket.io.socket"
+
 const express = require('express')
 const path = require('path')
 const { createServer } = require('http')
@@ -10,7 +13,6 @@ const io = new Server(httpServer)
 
 
 app.use(express.static(path.join(__dirname, 'views')))
-
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html')
