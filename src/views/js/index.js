@@ -9,7 +9,9 @@ const drag = e => {
     }
 
     drawCircle(position)
-    socket.emit('circle position', position)
+    console.log("se envia el evento al servidor")
+    // los eventos volatiles no se alamancena en el buffer
+    socket.volatile.emit('circle position', position)
 
 }
 
