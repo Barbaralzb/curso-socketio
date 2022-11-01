@@ -1,56 +1,26 @@
-// -> Este ya no lo necesito ya que me conecto al namespace por defecto.
-// -> Dentro de los parentesis es donde ponemos el namespace pero como esta vacio va a tomar el por defecto
-//const socket = io ()
+const socket = io()
 
-const user = prompt("Escribe tu usuario")
+const send = document.querySelector("#send")
+const disconnect = document.querySelector("#disconnect")
+const reconnect = document.querySelector("#reconnect")
 
-const profes = ["RetaxMaster", "juandc", "GNDX"]
+send.addEventListener("click" , () => {
+    // si el client esta desconetado pero sigue haciendo click
+    // esos clicks (que son logs) se van a inmprimir de una cuando se vuelva a conectar
+    // pero no es lo deseado en este caso
 
-let socketNamespace, group;
+    // socket.emit("is connected", "esta conectado")
 
-const chat = document.querySelector("#chat")
-const namespace = document.querySelector("#namespace")
-
-// Y esta funcion pemrmite detectar que un user se conectó
-// pero nosotros necesitamos trabajar con namespaces
-// entonces necesitamos especificar a que namespace vamos a conectarnos
-// const socket = io();
-// socket.on('welcome', res => {
-//     text.textContent = res
-// })
-
-
-
-if (profes.includes(user)) {
-    socketNamespace = io("/teachers")
-    group = "teachers"
-}
-else {
-    socketNamespace = io("/students")
-    group = "students"
-}
-
-
-// -> Aca yo solo tengo una instacia de sockets que va estar concetado a uno u a otro namespace
-
-socketNamespace.on("connect", () => {
-    namespace.textContent =  group
+    // -> Es por esto que voy a hacer una condicion antes de mandar emitir el evento
+    if (socket.connected) {
+        socket.emit("is connected", "esta conectado")
+    }
 })
 
-
-const sendMessage = document.querySelector("#sendMessage")
-sendMessage.addEventListener("click", () => {
-    const message = prompt("Escribe tu mensaje:")
-    // Aca le digo que io() va a estar conectandose a "/teachers"
-    socketNamespace.emit("send message", {
-        message, user
-    })
+disconnect.addEventListener("click" , () => {
+    socket.disconnect()
 })
 
-socketNamespace.on("message", messageData => {
-    const { user, message } = messageData
-    const li = document.createElement("li")
-    li.textContent = `${user} : ${message}`
-
-    chat.append(li)
+reconnect.addEventListener("click" , () => {
+    socket.connect()
 })
