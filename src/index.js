@@ -2,12 +2,30 @@ const express = require('express')
 const path = require('path')
 const { createServer } = require('http')
 const { Server } = require('socket.io')
-
+const { instrument } = require("@socket.io/admin-ui")
 
 const app = express()
 const httpServer = createServer(app)
-const io = new Server(httpServer)
+const io = new Server(httpServer, {
+    // Esto es para que la pagina estatica admin.socket.io pueda conectarse a nuestro localhost
+    cors: {
+        origin: ["https://admin.socket.io"],
+        credentials: true
+    }
+});
 
+// instrument(io, {
+//     auth : false
+// })
+
+instrument(io, {
+    auth: {
+        type: "basic",
+        username: "admin",
+        //field must be a valid bcrypt hash (generarla en linea)
+        password: "$2a$12$BWvkCMQj3dHAVLCBFh.qpugMT/3vvNwmP3fChJFkGXjoF1o0/zSIu"
+    }
+});
 
 app.use(express.static(path.join(__dirname, 'views')))
 
@@ -18,14 +36,6 @@ app.get('/', (req, res) => {
 
 
 io.on("connection", socket => {
-    //  -> De esta forma emito un evento a todos los clientes conectador incluyendome (al socket conectado)
-
-    // socket.on('circle position', position => {
-    //     io.emit('move circle', position)
-    // })
-
-
-    // Esto sirve por si se cae el servidor (o problemas de coneccion) pueda el cliente seguir interactuando
     socket.on('circle position', position => {
         socket.broadcast.emit('move circle', position)
     })
